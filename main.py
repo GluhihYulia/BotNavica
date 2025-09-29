@@ -1,6 +1,7 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
 import logging
+import asyncio
 
 # Включаем логирование
 logging.basicConfig(
@@ -28,18 +29,18 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif query.data == "teen":
         await query.edit_message_text("Ты выбрал: Подросток ✅")
 
-def main():
+async def main():
     # Создаём приложение
     TOKEN = "8440906881:AAEHXC3JNzdIccA7-DyGXxzCw0VQFU4DM1k"
-    app = Application.builder().token(TOKEN).build()
+    application = Application.builder().token(TOKEN).build()
     
     # Регистрируем обработчики
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CallbackQueryHandler(button_handler))
+    application.add_handler(CommandHandler("start", start))
+    application.add_handler(CallbackQueryHandler(button_handler))
     
     # Запускаем бота
     print("Бот запущен и работает!")
-    app.run_polling()
+    await application.run_polling()
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
