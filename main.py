@@ -1,7 +1,6 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
+from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, CallbackContext
 import logging
-import asyncio
 
 # Включаем логирование
 logging.basicConfig(
@@ -9,7 +8,7 @@ logging.basicConfig(
     level=logging.INFO
 )
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+def start(update: Update, context: CallbackContext):
     welcome_text = "Привет 👋\nКто ты?"
     
     keyboard = [
@@ -18,29 +17,33 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    await update.message.reply_text(welcome_text, reply_markup=reply_markup)
+    update.message.reply_text(welcome_text, reply_markup=reply_markup)
 
-async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+def button_handler(update: Update, context: CallbackContext):
     query = update.callback_query
-    await query.answer()
+    query.answer()
     
     if query.data == "adult":
-        await query.edit_message_text("Ты выбрал: Взрослый ✅")
+        query.edit_message_text("Ты выбрал: Взрослый ✅")
     elif query.data == "teen":
-        await query.edit_message_text("Ты выбрал: Подросток ✅")
+        query.edit_message_text("Ты выбрал: Подросток ✅")
 
-async def main():
-    # Создаём приложение
+def main():
+    # Создаём updater
     TOKEN = "8440906881:AAEHXC3JNzdIccA7-DyGXxzCw0VQFU4DM1k"
-    application = Application.builder().token(TOKEN).build()
+    updater = Updater(TOKEN, use_context=True)
+    
+    # Получаем dispatcher для регистрации обработчиков
+    dp = updater.dispatcher
     
     # Регистрируем обработчики
-    application.add_handler(CommandHandler("start", start))
-    application.add_handler(CallbackQueryHandler(button_handler))
+    dp.add_handler(CommandHandler("start", start))
+    dp.add_handler(CallbackQueryHandler(button_handler))
     
     # Запускаем бота
     print("Бот запущен и работает!")
-    await application.run_polling()
+    updater.start_polling()
+    updater.idle()
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
